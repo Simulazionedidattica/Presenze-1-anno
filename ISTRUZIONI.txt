@@ -1,0 +1,16 @@
+PRESENZE QR – VERSIONE CON COLLEGAMENTO AUTOMATICO
+
+Il file HTML è già configurato con questa applicazione web Google Apps Script:
+https://script.google.com/macros/s/AKfycbyEhCjU9mQW2TYn5zSzOrFX4XyEOl63WhMnSl1PlvUXrWNM_q3_HVNYEImLVvcZXgV8iQ/exec
+
+Non è necessario inserire manualmente il collegamento nelle impostazioni.
+
+UTILIZZO
+1. Pubblica tutti i file su GitHub Pages.
+2. Apri il link HTTPS con Safari o Chrome.
+3. Registra le presenze.
+4. Premi “Invia al foglio Google”.
+5. In caso di errore usa il cestino accanto alla presenza.
+
+IMPORTANTE
+Se sostituisci il file su GitHub e continui a vedere la vecchia versione, aggiorna la pagina oppure elimina i dati del sito/cache del browser.

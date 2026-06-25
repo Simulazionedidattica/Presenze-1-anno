@@ -1,0 +1,16 @@
+{
+  "name": "Registro Presenze Infermieristica",
+  "short_name": "Presenze",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F2F7FA",
+  "theme_color": "#153E5C",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

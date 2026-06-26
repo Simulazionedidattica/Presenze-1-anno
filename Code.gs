@@ -1,106 +1,142 @@
 const SPREADSHEET_ID = "1CDxFGSFvKIa-yrZahvhYbkxxZg21V1wC5H1DHCa2S90";
 const SHEET_GID = 1375747828;
-const META_KEY = "ID_REGISTRAZIONE";
+
+/*
+A = Informazioni cronologiche
+B = DATA
+C = ORA
+D = COGNOME E NOME (in stampatello)
+E = NOTE
+F = ID tecnico nascosto
+*/
 
 function doGet(e) {
-  return handleRequest(e);
-}
-
-function doPost(e) {
-  return handleRequest(e);
-}
-
-function handleRequest(e) {
-  const lock = LockService.getScriptLock();
-  lock.waitLock(30000);
+  const p = (e && e.parameter) || {};
+  const callback = String(p.callback || "");
 
   try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    const sh = ss.getSheetById(SHEET_GID);
-    if (!sh) throw new Error("Scheda Google non trovata: gid=" + SHEET_GID);
+    const action = String(p.action || "ping").toLowerCase();
+    const sh = getSheet_();
 
-    const p = (e && e.parameter) || {};
-    const action = String(p.action || "append").toLowerCase();
-    const id = String(p.id_registrazione || "").trim();
-
-    if (action === "delete") {
-      if (!id) throw new Error("ID registrazione mancante per la cancellazione");
-      const row = findRowByMetadata(sh, id);
-      if (row) sh.deleteRow(row);
-      return output({ok:true, deleted:Boolean(row), id_registrazione:id}, p.callback);
+    if (action === "ping") {
+      return output_({ok:true, message:"Collegamento attivo"}, callback);
     }
 
+    if (action === "delete") {
+      const id = String(p.id_registrazione || "").trim();
+      if (!id) throw new Error("ID mancante per la cancellazione");
+
+      const row = findRowById_(sh, id);
+      if (row) sh.deleteRow(row);
+      SpreadsheetApp.flush();
+
+      return output_({
+        ok:true,
+        deleted:Boolean(row),
+        id_registrazione:id
+      }, callback);
+    }
+
+    if (action !== "append") {
+      throw new Error("Azione non riconosciuta");
+    }
+
+    const id = String(p.id_registrazione || "").trim();
     if (!id) throw new Error("ID registrazione mancante");
 
-    const existingRow = findRowByMetadata(sh, id);
-    if (existingRow) {
-      return output({ok:true, duplicate:true, id_registrazione:id}, p.callback);
+    const existing = findRowById_(sh, id);
+    if (existing) {
+      return output_({
+        ok:true,
+        duplicate:true,
+        row:existing,
+        id_registrazione:id
+      }, callback);
     }
 
     const cognome = String(p.cognome || "").trim();
     const nome = String(p.nome || "").trim();
     const nominativo = [cognome, nome].filter(Boolean).join(" ").toUpperCase();
-
     if (!nominativo) throw new Error("Cognome e nome mancanti");
 
     const timestamp = p.timestamp_iso ? new Date(p.timestamp_iso) : new Date();
     const data = String(p.data || "").trim();
     const ora = String(p.ora || "").trim();
-    const note = String(p.note || ("Turno " + (p.turno || ""))).trim();
+    const turno = String(p.turno || "").trim();
+    const note = String(p.note || ("Turno " + turno)).trim();
 
-    const nextRow = Math.max(sh.getLastRow() + 1, 2);
+    const lock = LockService.getScriptLock();
+    lock.waitLock(30000);
 
-    // A: Informazioni cronologiche
-    // B: DATA
-    // C: ORA
-    // D: COGNOME E NOME (in stampatello)
-    // E: NOTE
-    sh.getRange(nextRow, 1, 1, 5).setValues([[
-      timestamp,
-      data,
-      ora,
-      nominativo,
-      note
-    ]]);
+    let row;
+    try {
+      row = Math.max(sh.getLastRow() + 1, 2);
 
-    sh.getRange(nextRow, 1).setNumberFormat("dd/MM/yyyy HH:mm:ss");
-    sh.getRange(nextRow, 4).setFontWeight("bold");
-    sh.getRange(nextRow, 1, 1, 5).addDeveloperMetadata(META_KEY, id);
+      sh.getRange(row, 1, 1, 6).setValues([[
+        timestamp,
+        data,
+        ora,
+        nominativo,
+        note,
+        id
+      ]]);
 
-    return output({
+      sh.getRange(row, 1).setNumberFormat("dd/MM/yyyy HH:mm:ss");
+      sh.getRange(row, 4).setFontWeight("bold");
+      sh.hideColumns(6);
+      SpreadsheetApp.flush();
+
+      const confirmed = String(sh.getRange(row, 6).getValue()).trim();
+      if (confirmed !== id) {
+        throw new Error("Il foglio non ha confermato la registrazione");
+      }
+    } finally {
+      lock.releaseLock();
+    }
+
+    return output_({
       ok:true,
       duplicate:false,
+      row:row,
       id_registrazione:id,
-      row:nextRow,
       nome:nominativo
-    }, p.callback);
+    }, callback);
 
   } catch (err) {
-    const callback = e && e.parameter ? e.parameter.callback : "";
-    return output({ok:false, error:String(err)}, callback);
-  } finally {
-    lock.releaseLock();
+    return output_({
+      ok:false,
+      error:err && err.message ? err.message : String(err)
+    }, callback);
   }
 }
 
-function findRowByMetadata(sh, id) {
-  const results = sh.createDeveloperMetadataFinder()
-    .withKey(META_KEY)
-    .withValue(id)
-    .find();
-
-  if (!results || !results.length) return null;
-
-  const location = results[0].getLocation();
-  const range = location.getRange();
-  return range ? range.getRow() : null;
+function doPost(e) {
+  return doGet(e);
 }
 
-function output(obj, callback) {
+function getSheet_() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sh = ss.getSheetById(SHEET_GID);
+  if (!sh) throw new Error("Scheda Google non trovata");
+  return sh;
+}
+
+function findRowById_(sh, id) {
+  const lastRow = sh.getLastRow();
+  if (lastRow < 2) return null;
+
+  const values = sh.getRange(2, 6, lastRow - 1, 1).getDisplayValues();
+  for (let i = 0; i < values.length; i++) {
+    if (String(values[i][0]).trim() === id) return i + 2;
+  }
+  return null;
+}
+
+function output_(obj, callback) {
   const json = JSON.stringify(obj);
 
   if (callback) {
-    const safeCallback = String(callback).replace(/[^\w.$]/g, "");
+    const safeCallback = callback.replace(/[^\w.$]/g, "");
     return ContentService
       .createTextOutput(safeCallback + "(" + json + ");")
       .setMimeType(ContentService.MimeType.JAVASCRIPT);

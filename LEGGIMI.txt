@@ -1,0 +1,9 @@
+VERSIONE OTTIMIZZATA PER CELLULARE
+
+Su GitHub sostituisci soltanto index.html.
+
+Apri dal cellulare:
+https://simulazionedidattica.github.io/Presenze-1-anno/?mobile=2
+
+Usa il telefono in verticale e apri il link in Safari o Chrome.
+La pagina occupa tutta l'altezza disponibile e non richiede zoom.

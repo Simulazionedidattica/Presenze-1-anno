@@ -2,69 +2,34 @@ const SPREADSHEET_ID = "1CDxFGSFvKIa-yrZahvhYbkxxZg21V1wC5H1DHCa2S90";
 const SHEET_GID = 1375747828;
 const NOTE_PREFIX = "PRESENZA_QR_ID:";
 
-/*
-STRUTTURA DEL FOGLIO
-A = Informazioni cronologiche
-B = DATA
-C = ORA
-D = COGNOME E NOME (in stampatello)
-E = NOTE
+function doGet() {
+  return HtmlService
+    .createHtmlOutputFromFile("Index")
+    .setTitle("Presenze QR · Infermieristica 1° anno")
+    .addMetaTag("viewport", "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no");
+}
 
-Non viene utilizzata alcuna sesta colonna.
-L'ID tecnico viene salvato in modo invisibile come nota della cella A.
-*/
-
-function doGet(e) {
-  const p = (e && e.parameter) || {};
-  const callback = String(p.callback || "");
-
+function salvaPresenza(record) {
   try {
-    const action = String(p.action || "ping").toLowerCase();
+    if (!record || !record.id_registrazione) {
+      throw new Error("Dati della presenza mancanti");
+    }
+
     const sh = getSheet_();
-
-    if (action === "ping") {
-      return output_({
-        ok: true,
-        message: "Collegamento al foglio attivo"
-      }, callback);
-    }
-
-    if (action === "delete") {
-      const id = String(p.id_registrazione || "").trim();
-      if (!id) throw new Error("Identificativo mancante per la cancellazione");
-
-      const row = findRowById_(sh, id);
-      if (row) {
-        sh.deleteRow(row);
-        SpreadsheetApp.flush();
-      }
-
-      return output_({
-        ok: true,
-        deleted: Boolean(row),
-        id_registrazione: id
-      }, callback);
-    }
-
-    if (action !== "append") {
-      throw new Error("Operazione non riconosciuta");
-    }
-
-    const id = String(p.id_registrazione || "").trim();
-    if (!id) throw new Error("Identificativo della registrazione mancante");
+    const id = String(record.id_registrazione).trim();
 
     const existingRow = findRowById_(sh, id);
     if (existingRow) {
-      return output_({
+      return {
         ok: true,
         duplicate: true,
         row: existingRow,
         id_registrazione: id
-      }, callback);
+      };
     }
 
-    const cognome = String(p.cognome || "").trim();
-    const nome = String(p.nome || "").trim();
+    const cognome = String(record.cognome || "").trim();
+    const nome = String(record.nome || "").trim();
     const nominativo = [cognome, nome]
       .filter(Boolean)
       .join(" ")
@@ -74,14 +39,14 @@ function doGet(e) {
       throw new Error("Cognome e nome dello studente mancanti");
     }
 
-    const timestamp = p.timestamp_iso
-      ? new Date(p.timestamp_iso)
+    const timestamp = record.timestamp_iso
+      ? new Date(record.timestamp_iso)
       : new Date();
 
-    const data = String(p.data || "").trim();
-    const ora = String(p.ora || "").trim();
-    const turno = String(p.turno || "").trim();
-    const note = String(p.note || ("Turno " + turno)).trim();
+    const data = String(record.data || "").trim();
+    const ora = String(record.ora || "").trim();
+    const turno = String(record.turno || "").trim();
+    const note = String(record.note || ("Turno " + turno)).trim();
 
     const lock = LockService.getScriptLock();
     lock.waitLock(30000);
@@ -90,13 +55,12 @@ function doGet(e) {
     try {
       row = Math.max(sh.getLastRow() + 1, 2);
 
-      // Scrive ESCLUSIVAMENTE nelle colonne A-E.
       sh.getRange(row, 1, 1, 5).setValues([[
-        timestamp,   // A - Informazioni cronologiche
-        data,        // B - DATA
-        ora,         // C - ORA
-        nominativo,  // D - COGNOME E NOME
-        note         // E - NOTE
+        timestamp,
+        data,
+        ora,
+        nominativo,
+        note
       ]]);
 
       sh.getRange(row, 1)
@@ -106,36 +70,74 @@ function doGet(e) {
       sh.getRange(row, 4).setFontWeight("bold");
       SpreadsheetApp.flush();
 
-      // Conferma reale della scrittura.
-      const savedName = String(sh.getRange(row, 4).getDisplayValue()).trim();
-      const savedNote = String(sh.getRange(row, 1).getNote()).trim();
+      const savedName = String(
+        sh.getRange(row, 4).getDisplayValue()
+      ).trim();
 
-      if (savedName !== nominativo || savedNote !== NOTE_PREFIX + id) {
-        throw new Error("Il foglio Google non ha confermato la registrazione");
+      const savedId = String(
+        sh.getRange(row, 1).getNote()
+      ).trim();
+
+      if (savedName !== nominativo || savedId !== NOTE_PREFIX + id) {
+        throw new Error("Il foglio non ha confermato la registrazione");
       }
 
     } finally {
       lock.releaseLock();
     }
 
-    return output_({
+    return {
       ok: true,
       duplicate: false,
       row: row,
       id_registrazione: id,
       nome: nominativo
-    }, callback);
+    };
 
-  } catch (err) {
-    return output_({
+  } catch (error) {
+    return {
       ok: false,
-      error: err && err.message ? err.message : String(err)
-    }, callback);
+      error: error && error.message
+        ? error.message
+        : String(error)
+    };
   }
 }
 
-function doPost(e) {
-  return doGet(e);
+function cancellaPresenza(payload) {
+  try {
+    const id = String(
+      payload && payload.id_registrazione
+        ? payload.id_registrazione
+        : ""
+    ).trim();
+
+    if (!id) {
+      throw new Error("Identificativo della presenza mancante");
+    }
+
+    const sh = getSheet_();
+    const row = findRowById_(sh, id);
+
+    if (row) {
+      sh.deleteRow(row);
+      SpreadsheetApp.flush();
+    }
+
+    return {
+      ok: true,
+      deleted: Boolean(row),
+      id_registrazione: id
+    };
+
+  } catch (error) {
+    return {
+      ok: false,
+      error: error && error.message
+        ? error.message
+        : String(error)
+    };
+  }
 }
 
 function getSheet_() {
@@ -143,7 +145,9 @@ function getSheet_() {
   const sh = ss.getSheetById(SHEET_GID);
 
   if (!sh) {
-    throw new Error("La scheda con gid 1375747828 non è stata trovata");
+    throw new Error(
+      "La scheda del foglio Google non è stata trovata"
+    );
   }
 
   return sh;
@@ -153,7 +157,10 @@ function findRowById_(sh, id) {
   const lastRow = sh.getLastRow();
   if (lastRow < 2) return null;
 
-  const notes = sh.getRange(2, 1, lastRow - 1, 1).getNotes();
+  const notes = sh
+    .getRange(2, 1, lastRow - 1, 1)
+    .getNotes();
+
   const target = NOTE_PREFIX + id;
 
   for (let i = 0; i < notes.length; i++) {
@@ -163,20 +170,4 @@ function findRowById_(sh, id) {
   }
 
   return null;
-}
-
-function output_(obj, callback) {
-  const json = JSON.stringify(obj);
-
-  if (callback) {
-    const safeCallback = callback.replace(/[^\w.$]/g, "");
-
-    return ContentService
-      .createTextOutput(safeCallback + "(" + json + ");")
-      .setMimeType(ContentService.MimeType.JAVASCRIPT);
-  }
-
-  return ContentService
-    .createTextOutput(json)
-    .setMimeType(ContentService.MimeType.JSON);
 }

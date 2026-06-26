@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="format-detection" content="telephone=no">
-<title>Presenze QR · Versione Mobile</title>
+<title>Presenze QR · Mobile stabile</title>
 <style>
 :root{
  --navy:#174b7c;--blue:#4b9bd3;--teal:#25aaa5;--teal2:#dff6f3;
@@ -482,7 +482,7 @@ window.addEventListener('resize',setMobileViewportHeight);
 window.addEventListener('orientationchange',()=>setTimeout(setMobileViewportHeight,250));
 
 const DEFAULT_WEBAPP_URL='https://script.google.com/macros/s/AKfycbyEhCjU9mQW2TYn5zSzOrFX4XyEOl63WhMnSl1PlvUXrWNM_q3_HVNYEImLVvcZXgV8iQ/exec';
-const STORAGE='presenze_qr_mobile_v2',ROSTER='presenze_roster_v1';
+const STORAGE='presenze_qr_mobile_stabile_v3',ROSTER='presenze_roster_v1';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const video=$('#video'),canvas=$('#canvas'),ctx=canvas.getContext('2d',{willReadFrequently:true});
 let selectedTurn='07:00',activeTab='all',stream=null,scanning=false,detector=null,lastValue='',lastTime=0;
@@ -538,8 +538,8 @@ async function syncRecord(rec){
 async function sendAll(){
  const pending=loadRecords().filter(r=>!r.synced);if(!pending.length)return feedback('ok','Tutto inviato','Non ci sono nuove presenze.');
  const btn=$('#sendBtn'),old=btn.innerHTML;btn.disabled=true;btn.innerHTML='⏳ Invio…';let sent=0;
- try{for(const r of pending){await syncRecord(r);sent++}feedback('ok','Invio completato',`${sent} presenz${sent===1?'a inviata':'e inviate'} correttamente.`);beep(true)}
- catch(e){feedback('err','Invio non riuscito',`${sent} inviate su ${pending.length}. ${e.message}`)}
+ try{for(const r of pending){await syncRecord(r);sent++}feedback('ok','✓ Invio completato correttamente',`${sent} presenz${sent===1?'a inviata':'e inviate'} correttamente.`);beep(true)}
+ catch(e){feedback('err','Invio al foglio non riuscito',`${sent} inviate su ${pending.length}. ${e.message}`)}
  finally{btn.disabled=false;btn.innerHTML=old;render()}
 }
 async function deleteRecord(id){

@@ -677,7 +677,7 @@
     const DEFAULT_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyEhCjU9mQW2TYn5zSzOrFX4XyEOl63WhMnSl1PlvUXrWNM_q3_HVNYEImLVvcZXgV8iQ/exec";
     const URL_STORAGE = 'presenze_qr_apps_script_url';
     const getAppsScriptUrl = () => localStorage.getItem(URL_STORAGE) || DEFAULT_APPS_SCRIPT_URL;
-    const STORAGE = 'presenze_qr_live_fix_link_v3';
+    const STORAGE = 'presenze_qr_live_fix_pending_v4';
     const $ = s => document.querySelector(s);
     const $$ = s => Array.from(document.querySelectorAll(s));
 
@@ -916,7 +916,7 @@
       const btn = $('#sendBtn');
       const old = btn.innerHTML;
       btn.disabled = true;
-      btn.innerHTML = '⏳ Invio in corso…';
+      btn.firstChild.nodeValue = '⏳ Invio in corso… ';
 
       let sent = 0;
 
@@ -1061,8 +1061,12 @@
 
       $('#countMorning').textContent = morning.length;
       $('#countAfternoon').textContent = afternoon.length;
-      $('#pendingCount').hidden = !pending.length;
-      $('#pendingCount').textContent = pending.length;
+
+      const pendingBadge = $('#pendingCount');
+      if (pendingBadge) {
+        pendingBadge.hidden = !pending.length;
+        pendingBadge.textContent = pending.length;
+      }
 
       $('#presenceList').innerHTML = todayRecords.length
         ? todayRecords.map(r => `

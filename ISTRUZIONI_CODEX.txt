@@ -1,13 +1,14 @@
 ISTRUZIONI PER CODEX
 
 Nel repository GitHub Presenze-1-anno:
-1. Sostituisci completamente index.html con questo index.html.
-2. Mantieni il pulsante ⚙️ Link.
-3. Mantieni DEFAULT_APPS_SCRIPT_URL e la possibilità di salvare il link /exec in localStorage.
-4. Mantieni scanner QR live e invio JSONP ad Apps Script.
-5. Fai commit.
+1. Sostituisci completamente index.html con il file index.html fornito.
+2. Mantieni lo scanner QR live.
+3. Mantieni il pulsante ⚙️ Link.
+4. Mantieni il fix sul pendingBadge:
+   const pendingBadge = $('#pendingCount');
+   if (pendingBadge) { ... }
+5. Non cambiare Code.gs se è già quello aggiornato.
+6. Fai commit.
 
-In Google Apps Script:
-1. Verifica che Codice.gs corrisponda al file Code.gs.
-2. Pubblica una nuova versione.
-3. Accesso: Chiunque.
+Poi aprire:
+https://simulazionedidattica.github.io/Presenze-1-anno/?fixpending=4

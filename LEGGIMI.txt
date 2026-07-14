@@ -1,27 +1,16 @@
-PRESENZE QR LIVE - FIX INVIO AL FOGLIO
+PRESENZE QR LIVE - FIX PENDINGCOUNT
 
-Questa versione aggiunge il pulsante:
-⚙️ Link
+Questa versione corregge l'errore:
+null is not an object (evaluating $('#pendingCount').hidden = ...)
 
-Serve per incollare direttamente nell'app il link Apps Script corretto che termina con /exec.
+Il problema era nel file index.html:
+durante l'invio il pulsante cambiava contenuto e il contatore pendingCount veniva rimosso temporaneamente.
 
-QUANDO USARLO:
-Se compare "errore di invio al foglio", di solito il link Apps Script dentro index.html non corrisponde più al deployment attuale.
+COSA FARE:
+1. Su GitHub/Codex sostituisci index.html con questo nuovo index.html.
+2. Fai commit.
+3. Apri da smartphone:
+   https://simulazionedidattica.github.io/Presenze-1-anno/?fixpending=4
 
-ISTRUZIONI:
-1. In Google Apps Script vai su Esegui il deployment > Gestisci deployment.
-2. Copia l'URL dell'app web che termina con /exec.
-3. Apri l'app da smartphone.
-4. Premi ⚙️ Link.
-5. Incolla il link /exec.
-6. Premi Salva collegamento.
-7. Premi Test.
-8. Se appare Collegamento attivo, l'invio funzionerà.
-
-IMPORTANTE:
-In Apps Script il deployment deve essere:
-- Esegui come: Me
-- Chi ha accesso: Chiunque
-
-LINK APP:
-https://simulazionedidattica.github.io/Presenze-1-anno/?fixlink=3
+Non è necessario modificare Code.gs se lo hai già aggiornato.
+Se il collegamento al foglio non è salvato, premi ⚙️ Link e incolla il link /exec.

@@ -1,14 +1,16 @@
 ISTRUZIONI PER CODEX
 
 Nel repository GitHub Presenze-1-anno:
-1. Sostituisci completamente index.html con il file index.html fornito.
-2. Mantieni lo scanner QR live.
-3. Mantieni il pulsante ⚙️ Link.
-4. Mantieni il fix sul pendingBadge:
-   const pendingBadge = $('#pendingCount');
-   if (pendingBadge) { ... }
-5. Non cambiare Code.gs se è già quello aggiornato.
-6. Fai commit.
+1. Sostituisci completamente index.html con il file fornito.
+2. Mantieni APPS_SCRIPT_URL già integrato.
+3. Non usare localStorage per le presenze.
+4. Le presenze devono essere caricate dal foglio tramite action=listToday.
+5. La registrazione QR deve inviare subito action=append.
+6. Il riepilogo 07:00/13:45 deve derivare dai record restituiti dal foglio.
+7. Mantieni scanner QR live con getUserMedia, BarcodeDetector e fallback jsQR.
+8. Fai commit.
 
-Poi aprire:
-https://simulazionedidattica.github.io/Presenze-1-anno/?fixpending=4
+In Google Apps Script:
+1. Sostituisci Codice.gs con Code.gs.
+2. Esegui testAutorizzazioneScrittura.
+3. Pubblica nuova versione del deployment con accesso Chiunque.

@@ -1,16 +1,42 @@
-PRESENZE QR LIVE - FIX PENDINGCOUNT
+PRESENZE QR - VERSIONE CONDIVISA GIORNATA
 
-Questa versione corregge l'errore:
-null is not an object (evaluating $('#pendingCount').hidden = ...)
+Questa versione mostra le presenze della giornata leggendo direttamente dal foglio Google.
+Quindi le presenze sono visibili da qualsiasi telefono, tablet o computer.
 
-Il problema era nel file index.html:
-durante l'invio il pulsante cambiava contenuto e il contatore pendingCount veniva rimosso temporaneamente.
+APP SCRIPT URL integrato:
+https://script.google.com/macros/s/AKfycbzmKWenQIDKMIoA28huMEP4E7ohEebZVNFQMCSPAMoaoNu8aaG88gWQZqQvLA7ovSA__w/exec
 
-COSA FARE:
-1. Su GitHub/Codex sostituisci index.html con questo nuovo index.html.
+FUNZIONAMENTO:
+- GitHub Pages legge il QR live con la fotocamera.
+- Apps Script scrive e legge dal foglio Google.
+- L'elenco "Presenze di oggi" viene caricato dal foglio, non dal cellulare.
+- I conteggi 07:00 e 13:45 vengono caricati dal foglio.
+- Quando registri una presenza, viene scritta subito nel foglio.
+
+FILE:
+1. index.html -> sostituire su GitHub
+2. Code.gs -> sostituire in Google Apps Script
+
+ISTRUZIONI APPS SCRIPT:
+1. Apri il foglio Google.
+2. Estensioni > Apps Script.
+3. In Codice.gs cancella tutto e incolla Code.gs.
+4. Salva.
+5. Esegui testAutorizzazioneScrittura almeno una volta.
+6. Deployment > Gestisci deployment > Matita > Nuova versione.
+7. Esegui come: Me.
+8. Chi ha accesso: Chiunque.
+9. Distribuisci.
+
+ISTRUZIONI GITHUB:
+1. Sostituisci index.html nel repository Presenze-1-anno.
 2. Fai commit.
-3. Apri da smartphone:
-   https://simulazionedidattica.github.io/Presenze-1-anno/?fixpending=4
+3. Apri:
+   https://simulazionedidattica.github.io/Presenze-1-anno/?shared=1
 
-Non è necessario modificare Code.gs se lo hai già aggiornato.
-Se il collegamento al foglio non è salvato, premi ⚙️ Link e incolla il link /exec.
+COLONNE:
+A = Informazioni cronologiche
+B = DATA
+C = ORA
+D = COGNOME E NOME
+E = NOTE

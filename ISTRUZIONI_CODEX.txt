@@ -1,0 +1,13 @@
+ISTRUZIONI PER CODEX
+
+Nel repository GitHub Presenze-1-anno:
+1. Sostituisci completamente index.html con questo index.html.
+2. Mantieni il pulsante ⚙️ Link.
+3. Mantieni DEFAULT_APPS_SCRIPT_URL e la possibilità di salvare il link /exec in localStorage.
+4. Mantieni scanner QR live e invio JSONP ad Apps Script.
+5. Fai commit.
+
+In Google Apps Script:
+1. Verifica che Codice.gs corrisponda al file Code.gs.
+2. Pubblica una nuova versione.
+3. Accesso: Chiunque.

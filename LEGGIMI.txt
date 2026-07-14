@@ -1,0 +1,27 @@
+PRESENZE QR LIVE - FIX INVIO AL FOGLIO
+
+Questa versione aggiunge il pulsante:
+⚙️ Link
+
+Serve per incollare direttamente nell'app il link Apps Script corretto che termina con /exec.
+
+QUANDO USARLO:
+Se compare "errore di invio al foglio", di solito il link Apps Script dentro index.html non corrisponde più al deployment attuale.
+
+ISTRUZIONI:
+1. In Google Apps Script vai su Esegui il deployment > Gestisci deployment.
+2. Copia l'URL dell'app web che termina con /exec.
+3. Apri l'app da smartphone.
+4. Premi ⚙️ Link.
+5. Incolla il link /exec.
+6. Premi Salva collegamento.
+7. Premi Test.
+8. Se appare Collegamento attivo, l'invio funzionerà.
+
+IMPORTANTE:
+In Apps Script il deployment deve essere:
+- Esegui come: Me
+- Chi ha accesso: Chiunque
+
+LINK APP:
+https://simulazionedidattica.github.io/Presenze-1-anno/?fixlink=3
